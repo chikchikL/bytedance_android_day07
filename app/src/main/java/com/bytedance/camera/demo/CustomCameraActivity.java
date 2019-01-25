@@ -28,8 +28,19 @@ import static com.bytedance.camera.demo.utils.Utils.getOutputMediaFile;
 public class CustomCameraActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = "CustomCameraActivity";
 
+    /**
+     * 单次变焦变化量
+     */
+    public static final int ZOOM_CHANGE_SCALE = 5;
+    /**
+     * 初始焦距
+     */
+    public static final int ZOOM_INIT_VALUE = 0;
+
     private SurfaceView mSurfaceView;
     private Camera mCamera;
+
+
 
     private int CAMERA_TYPE = Camera.CameraInfo.CAMERA_FACING_BACK;
 
@@ -103,13 +114,13 @@ public class CustomCameraActivity extends AppCompatActivity implements SurfaceHo
 
                 int zoomValue = params.getZoom();
                 //未达到变焦上限，则放大焦距
-                if(zoomValue <= MAX-5){
-                    zoomValue += 5;
+                if(zoomValue <= MAX-ZOOM_CHANGE_SCALE){
+                    zoomValue += ZOOM_CHANGE_SCALE;
                     params.setZoom(zoomValue);
 
                 }else{
                     //达到最大后回到原始焦距
-                    params.setZoom(0);
+                    params.setZoom(ZOOM_INIT_VALUE);
                 }
 
                 mCamera.setParameters(params);
@@ -234,9 +245,13 @@ public class CustomCameraActivity extends AppCompatActivity implements SurfaceHo
         mCamera.lock();
 
         //录制完成后，刷新媒体库
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        mediaScanIntent.setData(Uri.fromFile(outputMediaFile));
-        this.sendBroadcast(mediaScanIntent);
+        if(outputMediaFile != null){
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            mediaScanIntent.setData(Uri.fromFile(outputMediaFile));
+            this.sendBroadcast(mediaScanIntent);
+        }
+
+
     }
 
     @Override
